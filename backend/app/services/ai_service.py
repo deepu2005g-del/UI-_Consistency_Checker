@@ -110,7 +110,7 @@ async def generate_recommendations(
             if attempt > 0:
                 extra_instruction = "\n\nPREVIOUS ATTEMPT RETURNED INVALID JSON. Return ONLY a valid JSON array, nothing else."
 
-            response = client.models.generate_content(
+            response = await client.aio.models.generate_content(
                 model="gemini-2.0-flash",
                 contents=prompt + extra_instruction,
                 config=types.GenerateContentConfig(

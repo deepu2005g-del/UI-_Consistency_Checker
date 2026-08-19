@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Analyze } from './pages/Analyze';
 import { Results } from './pages/Results';
 import { Palette, CheckCircle, Smartphone, Zap } from 'lucide-react';
@@ -7,10 +7,10 @@ function App() {
   const [currentRoute, setCurrentRoute] = useState<'home' | 'analyze' | 'results'>('home');
   const [analysisId, setAnalysisId] = useState<string | null>(null);
 
-  const handleAnalysisComplete = (id: string) => {
+  const handleAnalysisComplete = useCallback((id: string) => {
     setAnalysisId(id);
     setCurrentRoute('results');
-  };
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col font-sans">

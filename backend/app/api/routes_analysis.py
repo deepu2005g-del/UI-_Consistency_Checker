@@ -4,6 +4,7 @@ Handles screenshot upload and URL analysis endpoints.
 """
 
 import logging
+import asyncio
 from typing import Optional
 
 from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks
@@ -89,6 +90,14 @@ async def _run_screenshot_analysis(analysis_id: str, screenshots: list[dict]) ->
     except Exception as e:
         logger.error(f"Screenshot analysis {analysis_id} failed: {e}", exc_info=True)
         report_service.fail_analysis(analysis_id, f"Analysis failed: {str(e)}")
+    except asyncio.CancelledError:
+        logger.error(f"Screenshot analysis {analysis_id} was cancelled.")
+        report_service.fail_analysis(analysis_id, "Analysis was cancelled by the server.")
+        raise
+    except BaseException as e:
+        logger.error(f"Screenshot analysis {analysis_id} failed with critical error: {e}", exc_info=True)
+        report_service.fail_analysis(analysis_id, f"Analysis failed critically: {str(e)}")
+        raise
 
 
 async def _run_url_analysis(analysis_id: str, url: str) -> None:
@@ -169,6 +178,14 @@ async def _run_url_analysis(analysis_id: str, url: str) -> None:
     except Exception as e:
         logger.error(f"URL analysis {analysis_id} failed: {e}", exc_info=True)
         report_service.fail_analysis(analysis_id, f"Analysis failed: {str(e)}")
+    except asyncio.CancelledError:
+        logger.error(f"URL analysis {analysis_id} was cancelled.")
+        report_service.fail_analysis(analysis_id, "Analysis was cancelled by the server.")
+        raise
+    except BaseException as e:
+        logger.error(f"URL analysis {analysis_id} failed with critical error: {e}", exc_info=True)
+        report_service.fail_analysis(analysis_id, f"Analysis failed critically: {str(e)}")
+        raise
 
 
 @router.post("/analyze/screenshots")

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { UploadZone } from '../components/UploadZone';
 import { UrlInput } from '../components/UrlInput';
 import { LoadingProgress } from '../components/LoadingProgress';
@@ -16,24 +16,38 @@ export function Analyze({ onComplete, onBack }: AnalyzeProps) {
   const [analysisId, setAnalysisId] = useState<string | null>(null);
   const [progress, setProgress] = useState<AnalysisProgress | null>(null);
 
+  // Use refs to keep the latest values accessible from the polling callback
+  // without causing the useEffect to re-run on every state change
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
+  const analysisIdRef = useRef(analysisId);
+  analysisIdRef.current = analysisId;
+
   // Poll for progress when analyzing
   useEffect(() => {
+    if (!isAnalyzing || !analysisId) return;
+
     let intervalId: number;
+    let cancelled = false;
 
     const pollProgress = async () => {
-      if (!analysisId) return;
+      const currentId = analysisIdRef.current;
+      if (!currentId || cancelled) return;
 
       try {
-        const response = await getAnalysis(analysisId);
-        
+        const response = await getAnalysis(currentId);
+        if (cancelled) return;
+
         if (response.progress) {
           setProgress(response.progress);
         }
 
         if (response.status === AnalysisStatus.COMPLETE) {
+          if (intervalId) window.clearInterval(intervalId);
           setIsAnalyzing(false);
-          onComplete(analysisId);
+          onCompleteRef.current(currentId);
         } else if (response.status === AnalysisStatus.FAILED) {
+          if (intervalId) window.clearInterval(intervalId);
           setIsAnalyzing(false);
         }
       } catch (error) {
@@ -41,16 +55,17 @@ export function Analyze({ onComplete, onBack }: AnalyzeProps) {
       }
     };
 
-    if (isAnalyzing && analysisId) {
-      intervalId = window.setInterval(pollProgress, 2000);
-    }
+    // Poll immediately on first run, then every 1.5 seconds
+    pollProgress();
+    intervalId = window.setInterval(pollProgress, 1500);
 
     return () => {
+      cancelled = true;
       if (intervalId) window.clearInterval(intervalId);
     };
-  }, [isAnalyzing, analysisId, onComplete]);
+  }, [isAnalyzing, analysisId]);
 
-  const handleScreenshotAnalyze = async (files: File[]) => {
+  const handleScreenshotAnalyze = useCallback(async (files: File[]) => {
     try {
       setIsAnalyzing(true);
       setProgress({
@@ -61,6 +76,18 @@ export function Analyze({ onComplete, onBack }: AnalyzeProps) {
       });
 
       const response = await analyzeScreenshots(files);
+
+      // Check if analysis already completed during the POST (unlikely but handle it)
+      if (response.status === AnalysisStatus.COMPLETE) {
+        setIsAnalyzing(false);
+        onCompleteRef.current(response.analysis_id);
+        return;
+      }
+
+      if (response.progress) {
+        setProgress(response.progress);
+      }
+
       setAnalysisId(response.analysis_id);
     } catch (error) {
       console.error(error);
@@ -72,9 +99,9 @@ export function Analyze({ onComplete, onBack }: AnalyzeProps) {
         message: error instanceof Error ? error.message : 'Upload failed',
       });
     }
-  };
+  }, []);
 
-  const handleUrlAnalyze = async (url: string) => {
+  const handleUrlAnalyze = useCallback(async (url: string) => {
     try {
       setIsAnalyzing(true);
       setProgress({
@@ -85,6 +112,18 @@ export function Analyze({ onComplete, onBack }: AnalyzeProps) {
       });
 
       const response = await analyzeUrl(url);
+
+      // Check if analysis already completed during the POST (unlikely but handle it)
+      if (response.status === AnalysisStatus.COMPLETE) {
+        setIsAnalyzing(false);
+        onCompleteRef.current(response.analysis_id);
+        return;
+      }
+
+      if (response.progress) {
+        setProgress(response.progress);
+      }
+
       setAnalysisId(response.analysis_id);
     } catch (error) {
       console.error(error);
@@ -96,7 +135,7 @@ export function Analyze({ onComplete, onBack }: AnalyzeProps) {
         message: error instanceof Error ? error.message : 'Failed to start analysis',
       });
     }
-  };
+  }, []);
 
   if (isAnalyzing || progress?.status === AnalysisStatus.FAILED) {
     return (
