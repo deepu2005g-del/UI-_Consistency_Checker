@@ -67,6 +67,7 @@ app.add_middleware(
         settings.FRONTEND_URL,
         "http://localhost:5173",
         "http://localhost:3000",
+        "https://ui-consistency-checker-sigma.vercel.app/"
     ],
     allow_credentials=True,
     allow_methods=["*"],
