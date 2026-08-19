@@ -1,6 +1,6 @@
 import { AnalysisResponse, AnalysisResult } from '../types/analysis';
 
-const API_BASE = '/api';
+const API_BASE = (import.meta as any).env.VITE_API_URL || '/api';
 
 export const analyzeScreenshots = async (files: File[]): Promise<AnalysisResponse> => {
   const formData = new FormData();
