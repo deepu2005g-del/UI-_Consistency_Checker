@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Analyze } from './pages/Analyze';
 import { Results } from './pages/Results';
-import { Palette, CheckCircle, Smartphone, Zap } from 'lucide-react';
+import { Palette, CheckCircle, Zap } from 'lucide-react';
 
 function App() {
   const [currentRoute, setCurrentRoute] = useState<'home' | 'analyze' | 'results'>('home');
