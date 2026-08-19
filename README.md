@@ -42,14 +42,9 @@ pip install -r requirements.txt
 # Install Playwright browsers
 playwright install chromium
 
-# Environment variables
-# Create a .env file based on the sample or just create it directly
-# Edit .env and add your GEMINI_API_KEY
-```
-
 Run the backend:
 ```bash
-uvicorn app.main:app --reload
+python -m uvicorn app.main:app
 # Runs on http://localhost:8000
 ```
 
