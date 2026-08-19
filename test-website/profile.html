@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Website - Profile</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f4; color: #333; }
+        .navbar { height: 60px; background: #fff; border-bottom: 1px solid #ddd; display: flex; align-items: center; padding: 0 20px; }
+        .navbar a { margin-right: 20px; text-decoration: none; color: #333; font-weight: bold; }
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        
+        /* INCONSISTENCY: H1 size is 36px here */
+        h1 { font-size: 36px; color: #111; }
+        
+        /* INCONSISTENCY: Button radius 20px, color #1D4ED8 */
+        .btn-primary { 
+            background-color: #1D4ED8; 
+            color: white; 
+            padding: 14px 28px; 
+            border: none; 
+            border-radius: 20px; 
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        /* INCONSISTENCY: Card padding 12px, radius 4px */
+        .card {
+            background: white;
+            padding: 12px;
+            border-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <a href="index.html">Home</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="profile.html">Profile</a>
+    </div>
+
+    <div class="container">
+        <h1>User Profile</h1>
+        <p>This page has a button with 20px radius and a primary color of #1D4ED8.</p>
+        
+        <div class="card">
+            <h2>Account Settings</h2>
+            <button class="btn-primary">Update Profile</button>
+        </div>
+    </div>
+</body>
+</html>
